@@ -4,6 +4,11 @@ name = "tmxrs"
 version = "0.0.1"
 authors = ["Erik Nelson <erik@nelsk.com>"]
 
+[dependencies.rust-sfml]
+
+git = "https://github.com/eriknelson/rust-sfml.git"
+rev = "0ca74d5be3abd9c82aee41451353082ca8fa631b"
+
 [[bin]]
 
 name = "mapload"
