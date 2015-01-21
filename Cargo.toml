@@ -1,0 +1,10 @@
+[package]
+
+name = "tmxrs"
+version = "0.0.1"
+authors = ["Erik Nelson <erik@nelsk.com>"]
+
+[[bin]]
+
+name = "mapload"
+path = "./src/examples/mapload/main.rs"
