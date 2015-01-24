@@ -7,7 +7,7 @@ authors = ["Erik Nelson <erik@nelsk.com>"]
 [dependencies.rust-sfml]
 
 git = "https://github.com/eriknelson/rust-sfml.git"
-rev = "0ca74d5be3abd9c82aee41451353082ca8fa631b"
+rev = "e3bbded7865d9b2ce07c23bb8273e6cd1d993bcf"
 
 [[bin]]
 
