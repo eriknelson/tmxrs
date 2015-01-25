@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 use std::default::Default;
 
-//use core::num::from_i32;
-
 use rsfml::system::Vector2f;
 use rsfml::graphics::{
   IntRect,
@@ -11,6 +9,7 @@ use rsfml::graphics::{
 
 use super::MapOrientation;
 
+// TODO: Fill out map loader, blocked on MapLayer type
 pub struct MapLoader<'a> {
   // Tile count
   width: u16,
@@ -43,24 +42,26 @@ impl Default for TileInfo {
   fn default() -> TileInfo {
     TileInfo {
       coords: [
-        Vector2f{ x: 0., y: 0. },
-        Vector2f{ x: 0., y: 0. },
-        Vector2f{ x: 0., y: 0. },
-        Vector2f{ x: 0., y: 0. },
+        Default::default(),
+        Default::default(),
+        Default::default(),
+        Default::default(),
       ],
-      size: Vector2f{ x: 0., y: 0. },
-      tile_set_id: 0_u16,
+      size: Default::default(),
+      tile_set_id: Default::default(),
     }
   }
 }
 
 #[cfg(test)]
+#[allow(unstable)]
 mod tests{
   use super::TileInfo;
   use rsfml::system::Vector2f;
   use std::default::Default;
 
   #[test]
+  #[allow(non_snake_case)]
   fn test_explicitly_initialized_TileInfo() {
     let tile_info = TileInfo {
       coords: [

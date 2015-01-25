@@ -1,3 +1,5 @@
+// TODO: Blocked on MapObject
+
 pub struct MapLayer {
   pub name: String
 }
