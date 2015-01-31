@@ -15,3 +15,5 @@ pub enum MapOrientation {
 mod map_loader;
 mod map_layer;
 mod map_object;
+mod geo;
+mod math;
