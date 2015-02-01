@@ -6,6 +6,7 @@ pub use self::map_loader::MapLoader;
 pub use self::map_layer::MapLayer;
 pub use self::map_object::MapObject;
 
+#[derive(Copy)]
 pub enum MapOrientation {
   Orthogonal,
   Isometric,
