@@ -21,8 +21,8 @@ enum Orientation {
 /// Given three collinear points, p, q, r, the check if the pint q lies on line
 /// segment `pr`
 fn on_segment(p: Vector2f, q: Vector2f, r: Vector2f) -> bool {
-  return (q.x <= partial_max(p.x, r.x).unwrap() && q.x >= partial_min(p.x, r.x).unwrap() &&
-          q.y <= partial_max(p.y, r.y).unwrap() && p.y >= partial_min(p.y, r.y).unwrap())
+  return q.x <= partial_max(p.x, r.x).unwrap() && q.x >= partial_min(p.x, r.x).unwrap() &&
+          q.y <= partial_max(p.y, r.y).unwrap() && p.y >= partial_min(p.y, r.y).unwrap()
 }
 
 fn get_orientation(p: &Vector2f, q: &Vector2f, r: &Vector2f) -> Orientation {
