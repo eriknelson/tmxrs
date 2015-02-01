@@ -11,74 +11,133 @@ use std::cmp::{
   partial_min,
 };
 
-////////////////////////////////////////////////////////////////////////////////
-/// Intersection math for `geo::Segments`
-/// Implementation of the following algorithm
-/// http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
-pub enum Intersection {
-  Intersects(Vector2f),
-  DoesNotIntersect,
-}
-
+#[derive(PartialEq)]
 enum Orientation {
-  Colinear,
+  Collinear,
   Clockwise,
   CounterClockwise,
 }
 
-/// Given three colinear points, p, q, r, the check if the pint q lies on line
+/// Given three collinear points, p, q, r, the check if the pint q lies on line
 /// segment `pr`
-fn on_segment(p: Vector2f, q: Vector2f,r: Vector2f) -> bool {
+fn on_segment(p: Vector2f, q: Vector2f, r: Vector2f) -> bool {
   return (q.x <= partial_max(p.x, r.x).unwrap() && q.x >= partial_min(p.x, r.x).unwrap() &&
           q.y <= partial_max(p.y, r.y).unwrap() && p.y >= partial_min(p.y, r.y).unwrap())
 }
 
-pub fn intersects(seg_one: &Segment, seg_two: &Segment) -> Intersection {
-  return Intersection::DoesNotIntersect;
+fn get_orientation(p: &Vector2f, q: &Vector2f, r: &Vector2f) -> Orientation {
+  let val = (q.y - p.y) * (r.x - q.x) -
+            (q.x - p.x) * (r.y - q.y);
 
-  // These look like segment sizes
-  //let s1 = seg_one.end - seg_one.start;
-  //println!("{} {}", s1.x, s1.y);
-  //let s2 = seg_two.end - seg_two.start;
-  //println!("{} {}", s2.x, s2.y);
+  return if val == 0.     { Orientation::Collinear }
+         else if val > 0. { Orientation::Clockwise }
+         else             { Orientation::CounterClockwise }
+}
 
-  //let s = (-s1.y * (seg_one.start.x - seg_two.start.x) +
-           //s1.x * (seg_one.start.y - seg_.start.y)) /
-    //(-s2.x * s1.y + s1.x * s2.y);
-  //println!("{}", s);
-  //let t = (-s2.x * (seg_one.start.y - segment.start.y) +
-           //s1.y * (seg_one.start.x - segment.start.x)) /
-    //(-s2.x * s1.y + s1.x * s2.y);
-  //println!("{}", t);
+/// Intersection math for `geo::Segments`
+/// Implementation of the following algorithm
+/// http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
+///
+/// Returns `true` if line seg_one and seg_two intersect
+pub fn intersects(seg_one: &Segment, seg_two: &Segment) -> bool {
 
-  //if s >= 0. && s <= 1. && t >= 0. && t <= 1. {
-    //// Detected intersection
+  // Find the four orientations needed for general and special cases
+  let o1 = get_orientation(&seg_one.start, &seg_one.end, &seg_two.start);
+  let o2 = get_orientation(&seg_one.start, &seg_one.end, &seg_two.end);
+  let o3 = get_orientation(&seg_two.start, &seg_two.end, &seg_one.start);
+  let o4 = get_orientation(&seg_two.start, &seg_two.end, &seg_one.end);
 
-    //let intersection = Vector2f {
-      //x: seg_one.start.x + (t * s1.x),
-      //y: seg_one.start.y + (t * s1.y)
-    //};
+  // General case
+  if o1 != o2 && o3 != o4 { return true; };
 
-    //return Intersection::Intersects(intersection);
-  //}
+  // Special Cases
+  if o1 == Orientation::Collinear &&
+     on_segment(seg_one.start, seg_two.start, seg_one.end){ return true; };
+  if o2 == Orientation::Collinear &&
+     on_segment(seg_one.start, seg_two.end, seg_one.end){ return true; };
+  if o3 == Orientation::Collinear &&
+     on_segment(seg_two.start, seg_one.start, seg_two.end){ return true; };
+  if o4 == Orientation::Collinear &&
+     on_segment(seg_two.start, seg_one.end, seg_two.end){ return true; };
 
-  //return Intersection::DoesNotIntersect;
+  return false;
 }
 
 #[cfg(test)]
 mod tests {
   use super::super::geo::Segment;
-  use super::Intersection;
+  use super::{
+    on_segment,
+    intersects,
+    Orientation,
+    get_orientation,
+  };
 
   use rsfml::system::Vector2f;
 
   #[test]
   fn test_should_be_on_segment(){
+    let forward_on_segment = on_segment(
+      Vector2f { x: 1., y: 1. },
+      Vector2f { x: 2., y: 2. },
+      Vector2f { x: 3., y: 3. },
+    );
+    assert!(forward_on_segment);
 
+    let reverse_on_segment = on_segment(
+      Vector2f { x: 3., y: 3. },
+      Vector2f { x: 2., y: 2. },
+      Vector2f { x: 1., y: 1. },
+    );
+    assert!(reverse_on_segment);
   }
 
   #[test]
   fn test_should_not_be_on_segment(){
+    let not_on_segment = on_segment(
+      Vector2f { x: 1., y: 1. },
+      Vector2f { x: 4., y: 4. },
+      Vector2f { x: 3., y: 3. },
+    );
+    assert!(!not_on_segment);
+  }
+
+  #[test]
+  fn test_orientation_collinear() {
+    let a = Vector2f { x: 1., y: 1. };
+    let b = Vector2f { x: 0.4, y: 0.4 };
+    let c = Vector2f { x: 3., y: 3. };
+
+    match get_orientation(&a, &b, &c) {
+      Orientation::Collinear => assert!(true),
+      _ => panic!("Expectation failed!"),
+    };
+  }
+
+  #[test]
+  fn test_orientation_clockwise() {
+    let a = Vector2f { x: 1., y: 2. };
+    let b = Vector2f { x: -2., y: -2. };
+    let c = Vector2f { x: 2., y: -2. };
+
+    match get_orientation(&a, &b, &c) {
+      Orientation::CounterClockwise => assert!(true),
+      _ => panic!("Expectation failed!"),
+    };
+
+  }
+
+  #[test]
+  fn test_orientation_counter_clockwise() {
+    let a = Vector2f { x: 2., y: -2. };
+    let b = Vector2f { x: -2., y: -2. };
+    let c = Vector2f { x: 1., y: 2. };
+
+    match get_orientation(&a, &b, &c) {
+      Orientation::Clockwise => assert!(true),
+      _ => panic!("Expectation failed!"),
+    };
+
   }
 
   #[test]
@@ -93,19 +152,22 @@ mod tests {
       end: Vector2f { x: -1.0, y: -4.0 }
     };
 
-    //let intersection = match seg_one.intersects(&seg_two) {
-      //Intersection::Intersects(i) => i,
-      //_ => panic!("Lines should intersect!"),
-    //};
-
-    //println!("The lines intersected! [ x: {}, y: {} ]",
-             //intersection.x,
-             //intersection.y);
-
-    assert!(true);
+    assert!(intersects(&seg_one, &seg_two));
   }
 
+  #[test]
   fn test_segments_should_not_intersect(){
-    assert!(true);
+    let seg_one = Segment {
+      start: Vector2f { x: -3.0, y: 1.0 },
+      end: Vector2f { x: 1.0, y: -2.0}
+    };
+
+    let seg_two = Segment {
+      start: Vector2f { x: 2.0, y: 2.0 },
+      end: Vector2f { x: 2.0, y: -2.0 }
+    };
+
+    assert!(!intersects(&seg_one, &seg_two));
   }
+
 }
